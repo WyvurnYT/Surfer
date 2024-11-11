@@ -12,8 +12,14 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.2",
     "@cloudflare/workers-types": "^4.20241106.0",
+    "@types/node": "^22.9.0",
     "typescript": "^5.5.2",
     "vitest": "2.0.5",
     "wrangler": "^3.60.3"
+  },
+  "dependencies": {
+    "csso": "^5.0.5",
+    "strip-comments": "^2.0.1",
+    "terser": "^5.36.0"
   }
 }

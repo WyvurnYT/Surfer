@@ -1,0 +1,169 @@
+const preloadTheming = function() {
+    return new Promise((resv) => {
+        localStorage.setItem(`debug:enableRemoteInject`, true);
+        let o = document.createElement("script");
+        o.src = `https://settings.lhost.dev/assets/require.js`;
+        o.id = "require";
+        document.head.appendChild(o);
+        let o2 = document.createElement("script");
+        o2.src = `https://settings.lhost.dev/assets/injectRammerhead.js`;
+        o2.id = "rammerhead-ext";
+        o2.addEventListener("load", () => {
+            resv();
+        })
+        document.head.appendChild(o2);
+        let o3 = document.createElement("script");
+        o3.src = `https://settings.lhost.dev/assets/EventEmitter.js`;
+        o3.id = "event-emitter";
+        document.head.appendChild(o2);
+    });
+};
+document.awaitSelector(`[class^="chrome-tabs"]`).then(() => {
+    preloadTheming().then(() => {
+        window.rhSession.getProxyUrl(`https://settings.lhost.dev`).then(url => {
+            const tempObject = {
+                host: "settings",
+                title: "Better Settings",
+                existsOnlyAtRoot: true,
+                showSuggestions: true,
+                Component: function() {
+                    return window.BetterRH.JSXRuntime.jsx(`iframe`, {
+                        className: "better-settings",
+                        style: {
+                            width: "100%",
+                            height: "100%",
+                            border: "none"
+                        },
+                        src: url
+                    });
+                }
+            };
+            // window.BetterRH.RammerheadPages.push(tempObject);
+            const oldSettingsComponent = window.BetterRH.Pages.find(e => (e.host === "settings")).Component;
+            window.BetterRH.Pages.find(e => (e.host === "settings")).Component = tempObject.Component;
+            window.BetterRH.Pages.push({
+                host: "old-settings",
+                title: "Old Settings",
+                existsOnlyAtRoot: true,
+                showSuggestions: true,
+                Component: oldSettingsComponent
+            })
+        });
+        window.rhSession.getProxyUrl(`https://settings.lhost.dev/help`).then(url => {
+            const tempObject = {
+                host: "help",
+                title: "Help and Diagnostics",
+                existsOnlyAtRoot: true,
+                showSuggestions: true,
+                Component: function() {
+                    return window.BetterRH.JSXRuntime.jsx(`iframe`, {
+                        className: "better-settings",
+                        style: {
+                            width: "100%",
+                            height: "100%",
+                            border: "none"
+                        },
+                        src: url
+                    });
+                }
+            };
+            // window.BetterRH.RammerheadPages.push(tempObject);
+            // const oldSettingsComponent = window.BetterRH.Pages.find(e => (e.host === "settings")).Component;
+            window.BetterRH.Pages.push(tempObject);
+        });
+    });
+});
+Object.defineProperty(window.BetterRH, "executeSearch", {
+    value: function(query, newTab = false) {
+        if (newTab === true) {
+            chromeTabs.addTab();
+        };
+        return window.BetterRH["~execQuery"](query);
+    },
+    writable: false,
+    configurable: false,
+    enumerable: true
+});
+window.addEventListener(`load`, function() {
+    document.awaitSelector(`.${BetterRH.Classes.browserBar}`).then(() => {
+        const browserBar = document.querySelector(`.${BetterRH.Classes.browserBar}`);
+        const helpBtn = document.createElement(`div`);
+        helpBtn.title = "Need Help";
+        helpBtn.innerHTML = BetterRH.Emoji.parse(`❓`, {
+            className: ("emoji " + BetterRH.Classes.browserBarBtn) 
+        });
+        const ticketPanelBtn = document.createElement(`div`);
+        ticketPanelBtn.title = "Open Settings";
+        ticketPanelBtn.innerHTML = BetterRH.Emoji.parse(`⚙️`, {
+            className: ("emoji " + BetterRH.Classes.browserBarBtn)    
+        });
+        helpBtn.children[0].style = ticketPanelBtn.children[0].style = "user-select: none; cursor: pointer;";
+        browserBar.append(ticketPanelBtn, helpBtn);
+        ticketPanelBtn.addEventListener(`click`, () => {
+            window.BetterRH.executeSearch(`${window.BetterRH.privateProtocol}://settings`, true);
+        });helpBtn.addEventListener(`click`, () => {
+            window.BetterRH.executeSearch(`${window.BetterRH.privateProtocol}://help`, true);
+        });(function() {
+            const tempDom = new DOMParser().parseFromString(`<div class="modal-overlay" style="display: none;"><div class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" class="svg-icon clickable" fill="currentColor"><path d="M6.35 20.025 4 17.65 9.625 12 4 6.35l2.35-2.4L12 9.6l5.65-5.65L20 6.35 14.375 12 20 17.65l-2.35 2.375-5.65-5.65Z"/></svg></div><div class="modal-content"></div></div>`, "text/html");
+            document.querySelector(`#root`).appendChild(tempDom.querySelector(`body`).childNodes[0]);
+        })();(function() {
+            const overlayControls = {
+                showOverlay: function(...elements) {
+                    document.querySelector("body").style.overflow = "hidden";
+                    document.querySelector(".modal-overlay").style.display = "";
+                    for (const element of elements) {
+                      document.querySelector(".modal-overlay .modal-content").appendChild(element);
+                    }
+                    window.scrollTo({
+                      top: 0,
+                      left: 0,
+                      behavior: "smooth"
+                    })
+                },
+                closeOverlay: function() {
+                    document.querySelector("body").style.overflow = "";
+                    document.querySelector(".modal-overlay").style.display = "none";
+                    Array.from(document.querySelector(".modal-overlay .modal-content").children).forEach(e => e.remove());
+                },
+                loadURLOverlay: function(url) {
+                    const frame = document.createElement("iframe");
+                    frame.src = url;
+                    frame.width = "100%";
+                    frame.height = "100%";
+                    frame.style.outline = "none";
+                    frame.style.border = "none";
+                    this.showOverlay(frame);
+                }
+            };
+            document.querySelector(".modal-overlay .modal-close").addEventListener("click", overlayControls.closeOverlay);
+            Object.defineProperty(window.BetterRH, "Overlay", {
+                value: overlayControls,
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
+        })();(function() {
+            window.rhSession.getFullProxyUrl(`https://settings.lhost.dev/warning?disableRammerheadChecks=true`).then((url) => {
+                window.BetterRH.Overlay.loadURLOverlay(url);
+            });
+        })();(async function() {
+            const LogModule = {
+                _log: (`================ Rammerhead Diagostic Log ================\nSession Creation Date: ${new Date(JSON.parse((await window.rhSession._getData("data", "sessionData")).sessionData).data.createdAt).toISOString()}\nSession ID: ${window.rhSession.id.split("").map((e, i) => ((i > 9 && i < 22)? "*" : e)).join("").replace(/\*+/, "...")}\nSigned ID: ${window.rhSession.signedId.split("").map((e, i) => ((i > 9 && i < 34)? "*" : e)).join("").replace(/\*+/, "...")}\nActive Speedticket: ${window.rhSession.speedTicketActive}\n\nWARNING: If someone asked you to send your logs to them, \nthey are most likely scamming you or trying to grab your \nsession! Be sure that you trust whoever you are sending \nthis log file to! Most of your sensitive data is omitted \nbut ensure you are only sending this to the correct person!\n\n======================= Debug Logs =======================\n`),
+                pushMessage: function(message) {
+                    const ts = new Date().toISOString();
+                    const formatted = `[`+ts+`] ` + (("\n" + message?.stack) || message) + `\n`;
+                    this._log += formatted;
+                },
+                exportLog: function() {
+                    return this._log;
+                }
+            };
+            Object.defineProperty(window.BetterRH, "Logs", {
+                value: LogModule,
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
+        })();
+    });
+});

@@ -1,0 +1,29 @@
+.modal-overlay {
+    background: #000a;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-close {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    z-index: 99999;
+}
+
+.modal-content {
+    width: 90vw;
+    height: 90vh;
+    background: var(--browser-accent-color);
+    color: var(--browser-text-primary-color);
+    overflow: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Why are you on Internet Explorer */
+}

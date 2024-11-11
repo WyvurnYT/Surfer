@@ -11,8 +11,10 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import generateCSS from "./css";
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+		return new Response(generateCSS(""));
 	},
 } satisfies ExportedHandler<Env>;
