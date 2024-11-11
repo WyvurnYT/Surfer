@@ -1,5 +1,5 @@
-import preScript from "preScript.html";
-import postScript from "postScript.html";
+import preScript from "./preScript.html";
+import postScript from "./postScript.html";
 // @ts-ignore
 import strip from "strip-comments";
 import { minify } from "terser";
