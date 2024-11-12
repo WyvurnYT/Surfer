@@ -16,3 +16,6 @@ Modification of the Default Bundle from the Rammerhead Browser and partially imp
     - Click `Continue to summary` and click `Create Token`
 
 - Finally, go to the [`Deploy to Workers`](../../actions/workflows/manual.yml) action and manually run the workflow!
+
+# How to attach to sites?
+- Read [wranger.toml](./wranger.toml) on how to setup routes.
