@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4.1.0
+      - name: Sanity Check
+        run: ls ./
       - name: Deploy to Cloudflare Workers
         run: npm run deploy
         env:
