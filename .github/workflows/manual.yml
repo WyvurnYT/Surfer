@@ -18,9 +18,6 @@ jobs:
     steps:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4.1.0
-        with:
-          cache: npm
-          cache-dependency-path: package-lock.json
       - name: Deploy to Cloudflare Workers
         run: npm run deploy
         env:
