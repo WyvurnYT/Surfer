@@ -18,4 +18,4 @@ Modification of the Default Bundle from the Rammerhead Browser and partially imp
 - Finally, go to the [`Deploy to Workers`](../../actions/workflows/manual.yml) action and manually run the workflow!
 
 # How to attach to sites?
-- Read [wranger.toml](./wranger.toml) on how to setup routes.
+- Read [wranger.toml](./wrangler.toml) on how to setup routes.
