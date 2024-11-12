@@ -10,12 +10,14 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
-  greet:
+  deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
       - name: Setup Node.js environment
         uses: actions/setup-node@v4.1.0
       - name: Sanity Check
