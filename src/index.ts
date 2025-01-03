@@ -77,7 +77,12 @@ export default {
 			const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
       		if (url.pathname === "/sw.js") {
         		if (!brhAccessCookie) throw new Error("Missing required cookie </3");
-        		return new Response(serviceWorker.replace("{{OFFLINE_TEMPLATE}}", offlineTemplate), {
+		  		const swSource = await fetch(`https://brh-sources.lhost.dev/sw.js`, {
+				    headers: {
+						"Cookie": "__BRH_ACCESS=i_am_using_better_rh"
+				    }
+				}).then(r => r.arrayBuffer());
+        		return new Response(swSource, {
           			headers: {
             			"Access-Control-Allow-Origin": "*",
             			"Content-Type": "application/javascript",
