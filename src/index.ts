@@ -15,7 +15,7 @@ import { parse, serialize } from "cookie";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-    ctx.passThroughOnException();
+    	ctx.passThroughOnException();
 		const req = new Request(request);
 		const url = new URL(req.url);
 		const cookies = parse(req.headers.get("Cookie") || "");
@@ -32,76 +32,76 @@ export default {
 			}
 		});
 		if (url.pathname === "/account.png") {
-		  const avatar = await fetch(`https://brh-sources.lhost.dev/account.png`).then(r => r.arrayBuffer());
-		  return new Response(avatar, {
+		  	const avatar = await fetch(`https://brh-sources.lhost.dev/account.png`).then(r => r.arrayBuffer());
+		  	return new Response(avatar, {
 				headers: {
-			  	"Access-Control-Allow-Origin": "*",
-			  	"Content-Type": "image/png",
-			  	"Cache-Control": "max-age=31536000",
-			  	"ETag": crypto.randomUUID().split("-").join(""),
+			  		"Access-Control-Allow-Origin": "*",
+			  		"Content-Type": "image/png",
+			  		"Cache-Control": "max-age=31536000",
+			  		"ETag": crypto.randomUUID().split("-").join(""),
 				}
-		  })
+		  	})
 		} else if (url.pathname === "/extRuntime.js") {
-		  const extensionRuntime = await fetch(`https://api.github.com/repos/TheRealGeoDash2019/Rammerhead-Patches/contents/extensionRuntime.js?ref=testing`, {
-		    headers: {
-          "User-Agent": "Cloudflare Worker/0.0.0",
-		      "Accept": "application/json"
-        }
-      }).then(re => re.json());
-	    return new Response(atob(extensionRuntime.content), {
-	      headers: {
-	        "Access-Control-Allow-Origin": "*",
-	        "Content-Type": "application/javascript",
-	        "Cache-Control": "no-transform",
-	        "ETag": crypto.randomUUID().split("-").join(""),
-	      }
-	    })
+		  	const extensionRuntime = await fetch(`https://api.github.com/repos/TheRealGeoDash2019/Rammerhead-Patches/contents/extensionRuntime.js?ref=testing`, {
+		    	headers: {
+          			"User-Agent": "Cloudflare Worker/0.0.0",
+		     		"Accept": "application/json"
+      			}
+      		}).then(re => re.json());
+	    	return new Response(atob(extensionRuntime.content), {
+	    		headers: {
+	        		"Access-Control-Allow-Origin": "*",
+	        		"Content-Type": "application/javascript",
+	        		"Cache-Control": "no-transform",
+	        		"ETag": crypto.randomUUID().split("-").join(""),
+	    		}
+	    	})
 		}
 		if (isCSS) {
 			const _fileContents = (await fileReq.text());
 			return new Response(_fileContents, {
 				headers: {
 					"Access-Control-Allow-Origin": "*",
-				  "Content-Type": "text/css",
-				  "Cache-Control": "no-transform",
-				  "ETag": crypto.randomUUID().split("-").join(""),
-				  "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+				  	"Content-Type": "text/css",
+				  	"Cache-Control": "no-transform",
+				  	"ETag": crypto.randomUUID().split("-").join(""),
+				  	"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
 						path: "/",
 						httpOnly: true,
 						secure: true,
 						sameSite: true
-				  })
+				  	})
 				}
 			});
 		} else if (isJS) {
 			const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
-      if (url.pathname === "/sw.js") {
-        if (!brhAccessCookie) throw new Error("Missing required cookie </3");
-        return new Response(serviceWorker.replace("{{OFFLINE_TEMPLATE}}", offlineTemplate), {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/javascript",
-            "Cache-Control": "no-transform",
-            "ETag": crypto.randomUUID().split("-").join(""),
-          }
-        })
-      }
+      		if (url.pathname === "/sw.js") {
+        		if (!brhAccessCookie) throw new Error("Missing required cookie </3");
+        		return new Response(serviceWorker.replace("{{OFFLINE_TEMPLATE}}", offlineTemplate), {
+          			headers: {
+            			"Access-Control-Allow-Origin": "*",
+            			"Content-Type": "application/javascript",
+            			"Cache-Control": "no-transform",
+            			"ETag": crypto.randomUUID().split("-").join(""),
+          			}
+        		})
+      		}
 			const _fileContents = (await fileReq.text());
 			// const _newContent = `!(function(){ const _css="${btoa(chromeTabsCSS)}"; const _sys="${btoa(escape(_fileContents))}"; window.eval(unescape(atob(_sys))); const style=document.createElement("style");style.textContent=atob(_css);document.head.appendChild(style); })();`;
 			return new Response(_fileContents, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/javascript",
-          "Cache-Control": "no-transform",
-          "ETag": crypto.randomUUID().split("-").join(""),
-          "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-            path: "/",
-            httpOnly: true,
-            secure: true,
-            sameSite: true
-          })
-        },
-      }); 
+        		headers: {
+          			"Access-Control-Allow-Origin": "*",
+          			"Content-Type": "application/javascript",
+          			"Cache-Control": "no-transform",
+          			"ETag": crypto.randomUUID().split("-").join(""),
+          			"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+            			path: "/",
+            			httpOnly: true,
+            			secure: true,
+            			sameSite: true
+          			})
+       			},
+      		}); 
 		} else {
 			return new Response("Malformed", {
 				headers: {
