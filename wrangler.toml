@@ -6,10 +6,9 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 # Replace example.com with your domain name hosting a Rammerhead Browser proxy
 # Example: rhbrowser.example.com and secretbrowser.example.com would work with these:
-# routes = [
-#   { pattern = "*.example.com/static/css/main*", zone_name = "example.com" }
-# 	{ pattern = "*.example.com/static/js/main*", zone_name = "example.com" }
-# ]
+ routes = [
+   { pattern = "*.schmaa.com/static/css/main*", zone_name = "schmaa.com" }
+ ]
 
 [observability]
 enabled = true
