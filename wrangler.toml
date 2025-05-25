@@ -3,7 +3,7 @@ name = "better-rammerhead"
 main = "src/index.ts"
 compatibility_date = "2024-11-06"
 compatibility_flags = ["nodejs_compat"]
-workers_dev = false
+workers_dev = true
 # Replace example.com with your domain name hosting a Rammerhead Browser proxy
 # Example: rhbrowser.example.com and secretbrowser.example.com would work with these:
  routes = [
