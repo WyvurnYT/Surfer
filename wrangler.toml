@@ -7,8 +7,8 @@ workers_dev = false
 # Replace example.com with your domain name hosting a Rammerhead Browser proxy
 # Example: rhbrowser.example.com and secretbrowser.example.com would work with these:
 routes = [
-  { pattern = "*.schmaa.com/static/css/main*", zone_name = "schmaa.com" }
-	{ pattern = "*.schmaa.com/static/js/main*", zone_name = "schmaa.com" }
+  { pattern = "*.better-rammerhead.infinitygamer7423.workers.dev/static/css/main*", zone_name = "better-rammerhead.infinitygamer7423.workers.dev" },
+  { pattern = "*.better-rammerhead.infinitygamer7423.workers.dev/static/js/main*", zone_name = "better-rammerhead.infinitygamer7423.workers.dev" }
 ]
 
 [observability]
