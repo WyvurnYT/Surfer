@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 
 routes = [
-  { pattern = "surfer.schmaa.com/*", zone_name = "schmaa.com" }
+  { pattern = "*.schmaa.com/static/css/main*", zone_name = "schmaa.com" }
 ]
 
 [observability]
