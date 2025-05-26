@@ -5,7 +5,7 @@ compatibility_date = "2024-11-06"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 routes = [
-  { pattern = "surfer.schmaa.com/static/css/main*", zone_name = "schmaa.com" },
+  { pattern = "surfer.schmaa.com/static/css/main*", zone_name = "schmaa.com" }
   { pattern = "surfer.schmaa.com/static/js/main*", zone_name = "schmaa.com" }
 ]
 
