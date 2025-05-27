@@ -66,17 +66,23 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     "https://search.brave.com/search?q="
   );
 
-  // Inject JS to update the message text
+  // Inject robust JS to update the message text whenever it appears
   const injectScript = `
-try {
-  document.addEventListener("DOMContentLoaded", function() {
-    var msg = document.querySelector(".rhnewtab-msg-40821");
-    if (msg) msg.textContent = "Surfer Browser. Powered by Rammerhead.";
-  });
-} catch (e) {}
+(function() {
+  function updateMsg() {
+    var el = document.querySelector(".rhnewtab-msg-40821");
+    if (el && el.textContent !== "Surfer Browser. Powered by Rammerhead.") {
+      el.textContent = "Surfer Browser. Powered by Rammerhead.";
+    }
+  }
+  // Initial check
+  updateMsg();
+  // Keep watching for changes in the body
+  var observer = new MutationObserver(updateMsg);
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
 `;
 
-  // Append the injected script to the patched JS
   const finalJS = patchedContents + injectScript;
 
   return new Response(finalJS, {
