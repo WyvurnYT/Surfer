@@ -32,23 +32,28 @@ export default {
 			}
 		});
 		if (isCSS) {
-  const _fileContents = (await fileReq.text());
-  // PATCH: Remove all rules for .rhnewtab-oldui-container-357674
-  const patchedCSS = _fileContents.replace(/\.rhnewtab-oldui-container-357674\s*\{[^}]*\}/g, "");
-  return new Response(patchedCSS, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "text/css",
-      "Cache-Control": "no-transform",
-      "ETag": crypto.randomUUID().split("-").join(""),
-      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: true
-      })
-    }
-  });
+const _fileContents = (await fileReq.text());
+// Inject CSS to hide the element
+const patchedCSS = `
+.rhnewtab-oldui-container-357674 {
+  display: none !important;
+}
+` + _fileContents;
+
+return new Response(patchedCSS, {
+  headers: {
+    "Access-Control-Allow-Origin": "*",
+    "Content-Type": "text/css",
+    "Cache-Control": "no-transform",
+    "ETag": crypto.randomUUID().split("-").join(""),
+    "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: true
+    })
+  }
+});
 } else if (isJS) {
   const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
   if (url.pathname === "/sw.js") {
