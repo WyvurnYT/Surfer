@@ -6,3 +6,5 @@ Modification of the Default Bundle from the Rammerhead Browser (with support for
 - External links on the home page are removed to prevent issues with the embed system.
 - The home page has been cleaned up.
 - The popout button has been removed.
+
+[`Deploy to Workers`](../../actions/workflows/manual.yml)
