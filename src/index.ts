@@ -21,7 +21,7 @@ export default {
 		const cookies = parse(req.headers.get("Cookie") || "");
 		const isCSS = url.href.includes(".css");
 		const isJS = url.href.includes(".js");
-		const fileReq = await fetch(url.href.replace(url.hostname, "brh-sources.lhost.dev"), {
+		const fileReq = await fetch(url.href.replace(url.hostname, "direct.rammerhead.org"), {
 			method: req.method,
 			headers: {
 				"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
