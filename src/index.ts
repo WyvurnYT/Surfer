@@ -59,30 +59,27 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     }
   });
 } else if (isJS) {
-  const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
-  if (url.pathname === "/sw.js") {
-    if (!brhAccessCookie) throw new Error("Missing required cookie </3");
-    const swSource = await fetch(`https://brh-sources.lhost.dev/sw.js`, {
-      headers: {
-        "Cookie": "__BRH_ACCESS=i_am_using_better_rh"
-      }
-    }).then(r => r.arrayBuffer());
-    return new Response(swSource, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/javascript",
-        "Cache-Control": "no-transform",
-        "ETag": crypto.randomUUID().split("-").join(""),
-      }
-    })
-  }
   const _fileContents = (await fileReq.text());
   // PATCH: Replace Google search with Brave search
   const patchedContents = _fileContents.replace(
     "https://www.google.com/search?q=",
     "https://search.brave.com/search?q="
   );
-  return new Response(patchedContents, {
+
+  // Inject JS to update the message text
+  const injectScript = `
+try {
+  document.addEventListener("DOMContentLoaded", function() {
+    var msg = document.querySelector(".rhnewtab-msg-40821");
+    if (msg) msg.textContent = "Surfer Browser. Powered by Rammerhead.";
+  });
+} catch (e) {}
+`;
+
+  // Append the injected script to the patched JS
+  const finalJS = patchedContents + injectScript;
+
+  return new Response(finalJS, {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/javascript",
