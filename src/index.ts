@@ -71,9 +71,9 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 (function() {
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
-    if (el && el.textContent !== "Surfer Browser\\nDue to limitations of the browser, some links may not work.") {
-      el.textContent = "Surfer Browser\\nDue to limitations of the browser, some links may not work.";
-    }
+if (el && el.innerText !== "Surfer Browser\nDue to limitations of the browser, some links may not work.") {
+  el.innerText = "Surfer Browser\nDue to limitations of the browser, some links may not work.";
+}
   }
   // Initial check
   updateMsg();
