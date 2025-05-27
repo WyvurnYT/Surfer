@@ -33,22 +33,17 @@ export default {
 		});
 		if (isCSS) {
   const _fileContents = (await fileReq.text());
-  // Inject CSS to hide two elements and override the message text
   const patchedCSS = `
 .rhnewtab-oldui-container-357674,
 .rhnewtab-discord-532247 {
   display: none !important;
 }
 .rhnewtab-msg-40821 {
-  position: relative;
   color: transparent !important;
+  position: relative;
 }
 .rhnewtab-msg-40821::after {
   content: "Surfer browser powered by Rammerhead.";
-  position: absolute;
-  left: 0;
-  width: 100%;
-  white-space: pre-line;
   color: inherit;
 }
 ` + _fileContents;
