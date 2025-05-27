@@ -32,28 +32,41 @@ export default {
 			}
 		});
 		if (isCSS) {
-const _fileContents = (await fileReq.text());
-// Inject CSS to hide the element
-const patchedCSS = `
-.rhnewtab-oldui-container-357674 {
+  const _fileContents = (await fileReq.text());
+  // Inject CSS to hide two elements and override the message text
+  const patchedCSS = `
+.rhnewtab-oldui-container-357674,
+.rhnewtab-discord-532247 {
   display: none !important;
+}
+.rhnewtab-msg-40821 {
+  position: relative;
+  color: transparent !important;
+}
+.rhnewtab-msg-40821::after {
+  content: "Surfer browser powered by Rammerhead.";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  white-space: pre-line;
+  color: inherit;
 }
 ` + _fileContents;
 
-return new Response(patchedCSS, {
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "text/css",
-    "Cache-Control": "no-transform",
-    "ETag": crypto.randomUUID().split("-").join(""),
-    "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: true
-    })
-  }
-});
+  return new Response(patchedCSS, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "text/css",
+      "Cache-Control": "no-transform",
+      "ETag": crypto.randomUUID().split("-").join(""),
+      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: true
+      })
+    }
+  });
 } else if (isJS) {
   const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
   if (url.pathname === "/sw.js") {
