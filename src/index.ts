@@ -33,12 +33,13 @@ export default {
 		});
 		if (isCSS) {
   const _fileContents = (await fileReq.text());
-  // Inject CSS to hide the elements
+  // Inject CSS to hide the specified elements
   const patchedCSS = `
 .rhnewtab-oldui-container-357674,
 .rhnewtab-discord-532247,
 .rhnewtab-header-ad-793410,
-.rhnewtab-header-268997 {
+.rhnewtab-header-268997,
+div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   display: none !important;
 }
 ` + _fileContents;
