@@ -52,26 +52,44 @@ export default {
 				}
 			});
 		} else if (isJS) {
-			const _fileContents = (await fileReq.text());
-			// Example:
-			// const _myPatchedContents = ("console.log('Hello World from Workers!');\n" + _fileContents);
-			// return new Response(_myPatchedContents, {
-			// instead of:
-			return new Response(_fileContents, {
-	        		headers: {
-	          			"Access-Control-Allow-Origin": "*",
-	          			"Content-Type": "application/javascript",
-	          			"Cache-Control": "no-transform",
-	          			"ETag": crypto.randomUUID().split("-").join(""),
-	          			"Set-Cookie": serialize("__PATCHED_ACCESS", "i_am_using_patched_rh", {
-		            			path: "/",
-		            			httpOnly: true,
-		            			secure: true,
-		            			sameSite: true
-	          			})
-	       			},
-      			}); 
-		} else {
+  const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
+  if (url.pathname === "/sw.js") {
+    if (!brhAccessCookie) throw new Error("Missing required cookie </3");
+    const swSource = await fetch(`https://brh-sources.lhost.dev/sw.js`, {
+      headers: {
+        "Cookie": "__BRH_ACCESS=i_am_using_better_rh"
+      }
+    }).then(r => r.arrayBuffer());
+    return new Response(swSource, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-transform",
+        "ETag": crypto.randomUUID().split("-").join(""),
+      }
+    })
+  }
+  const _fileContents = (await fileReq.text());
+  // PATCH: Replace Google search with Brave search
+  const patchedContents = _fileContents.replace(
+    "https://www.google.com/search?q=",
+    "https://search.brave.com/search?q="
+  );
+  return new Response(patchedContents, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/javascript",
+      "Cache-Control": "no-transform",
+      "ETag": crypto.randomUUID().split("-").join(""),
+      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: true
+      })
+    },
+  }); 
+} else {
 			return new Response("Malformed", {
 				headers: {
 					"Content-Type": "text/plain",
