@@ -36,7 +36,9 @@ export default {
   // Inject CSS to hide the elements
   const patchedCSS = `
 .rhnewtab-oldui-container-357674,
-.rhnewtab-discord-532247 {
+.rhnewtab-discord-532247,
+.rhnewtab-header-ad-793410,
+.rhnewtab-header-268997 {
   display: none !important;
 }
 ` + _fileContents;
