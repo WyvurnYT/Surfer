@@ -33,20 +33,11 @@ export default {
 		});
 		if (isCSS) {
   const _fileContents = (await fileReq.text());
+  // Inject CSS to hide the elements
   const patchedCSS = `
 .rhnewtab-oldui-container-357674,
 .rhnewtab-discord-532247 {
   display: none !important;
-}
-
-/* Only modify the text of the message element */
-.rhnewtab-msg-40821 {
-  position: relative;
-  color: transparent !important;
-}
-.rhnewtab-msg-40821::after {
-  content: "Surfer browser powered by Rammerhead.";
-  color: inherit;
 }
 ` + _fileContents;
 
