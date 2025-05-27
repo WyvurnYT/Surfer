@@ -15,7 +15,7 @@ import { parse, serialize } from "cookie";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-    	ctx.passThroughOnException();
+		ctx.passThroughOnException();
 		const req = new Request(request);
 		const url = new URL(req.url);
 		const cookies = parse(req.headers.get("Cookie") || "");
@@ -33,13 +33,17 @@ export default {
 		});
 		if (isCSS) {
 			const _fileContents = (await fileReq.text());
+			// Example:
+			// const _myPatchedContents = ("html,body{background:red;}\n" + _fileContents);
+			// return new Response(_myPatchedContents, {
+			// instead of:
 			return new Response(_fileContents, {
 				headers: {
 					"Access-Control-Allow-Origin": "*",
 				  	"Content-Type": "text/css",
 				  	"Cache-Control": "no-transform",
 				  	"ETag": crypto.randomUUID().split("-").join(""),
-				  	"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+				  	"Set-Cookie": serialize("__PATCHED_ACCESS", "i_am_using_patched_rh", {
 						path: "/",
 						httpOnly: true,
 						secure: true,
@@ -48,39 +52,25 @@ export default {
 				}
 			});
 		} else if (isJS) {
-			const brhAccessCookie = ((cookies && cookies["__BRH_ACCESS"])? (cookies["__BRH_ACCESS"] === "i_am_using_better_rh") : false);
-      		if (url.pathname === "/sw.js") {
-        		if (!brhAccessCookie) throw new Error("Missing required cookie </3");
-		  		const swSource = await fetch(`https://brh-sources.lhost.dev/sw.js`, {
-				    headers: {
-						"Cookie": "__BRH_ACCESS=i_am_using_better_rh"
-				    }
-				}).then(r => r.arrayBuffer());
-        		return new Response(swSource, {
-          			headers: {
-            			"Access-Control-Allow-Origin": "*",
-            			"Content-Type": "application/javascript",
-            			"Cache-Control": "no-transform",
-            			"ETag": crypto.randomUUID().split("-").join(""),
-          			}
-        		})
-      		}
 			const _fileContents = (await fileReq.text());
-			// const _newContent = `!(function(){ const _css="${btoa(chromeTabsCSS)}"; const _sys="${btoa(escape(_fileContents))}"; window.eval(unescape(atob(_sys))); const style=document.createElement("style");style.textContent=atob(_css);document.head.appendChild(style); })();`;
+			// Example:
+			// const _myPatchedContents = ("console.log('Hello World from Workers!');\n" + _fileContents);
+			// return new Response(_myPatchedContents, {
+			// instead of:
 			return new Response(_fileContents, {
-        		headers: {
-          			"Access-Control-Allow-Origin": "*",
-          			"Content-Type": "application/javascript",
-          			"Cache-Control": "no-transform",
-          			"ETag": crypto.randomUUID().split("-").join(""),
-          			"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-            			path: "/",
-            			httpOnly: true,
-            			secure: true,
-            			sameSite: true
-          			})
-       			},
-      		}); 
+	        		headers: {
+	          			"Access-Control-Allow-Origin": "*",
+	          			"Content-Type": "application/javascript",
+	          			"Cache-Control": "no-transform",
+	          			"ETag": crypto.randomUUID().split("-").join(""),
+	          			"Set-Cookie": serialize("__PATCHED_ACCESS", "i_am_using_patched_rh", {
+		            			path: "/",
+		            			httpOnly: true,
+		            			secure: true,
+		            			sameSite: true
+	          			})
+	       			},
+      			}); 
 		} else {
 			return new Response("Malformed", {
 				headers: {
