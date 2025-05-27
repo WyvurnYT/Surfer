@@ -38,9 +38,11 @@ export default {
 .rhnewtab-discord-532247 {
   display: none !important;
 }
+
+/* Only modify the text of the message element */
 .rhnewtab-msg-40821 {
-  color: transparent !important;
   position: relative;
+  color: transparent !important;
 }
 .rhnewtab-msg-40821::after {
   content: "Surfer browser powered by Rammerhead.";
