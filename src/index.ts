@@ -69,20 +69,12 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
   // Inject robust JS to update the message text whenever it appears
- const injectScript = `
+const injectScript = `
 (function() {
-  let hasRunI = false;
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
-    }
-    // Run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
-    if (!hasRunI && typeof i === "function" && typeof Ve === "function") {
-      hasRunI = true;
-      setTimeout(function() {
-        i(Ve("https://search.brave.com"));
-      }, 5000);
     }
   }
   // Initial check
@@ -90,6 +82,13 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // Keep watching for changes in the body
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // Run s('https://search.brave.com') every time space is pressed
+  window.addEventListener("keydown", function(e) {
+    if (e.code === "Space" && typeof s === "function") {
+      s("https://search.brave.com");
+    }
+  });
 })();
 `;
 
