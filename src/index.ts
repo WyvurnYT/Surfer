@@ -71,10 +71,16 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // Inject robust JS to update the message text whenever it appears
   const injectScript = `
 (function() {
+  let hasRunS = false;
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
+    }
+    // Run s() only once, when the observer picks up the first change
+    if (!hasRunS && typeof s === "function") {
+      s("https://search.brave.com");
+      hasRunS = true;
     }
   }
   // Initial check
@@ -82,17 +88,6 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // Keep watching for changes in the body
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
-
-  // Inject s('https://search.brave.com') to run on page load
-  if (typeof s === "function") {
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-      s("https://search.brave.com");
-    } else {
-      window.addEventListener("DOMContentLoaded", function() {
-        s("https://search.brave.com");
-      });
-    }
-  }
 })();
 `;
 
