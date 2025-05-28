@@ -82,6 +82,17 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // Keep watching for changes in the body
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // Inject s('https://search.brave.com') to run on page load
+  if (typeof s === "function") {
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      s("https://search.brave.com");
+    } else {
+      window.addEventListener("DOMContentLoaded", function() {
+        s("https://search.brave.com");
+      });
+    }
+  }
 })();
 `;
 
