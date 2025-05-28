@@ -77,10 +77,12 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
     }
-    // Run s() only once, when the observer picks up the first change
+    // Run s() only once, 5 seconds after the first mutation
     if (!hasRunS && typeof s === "function") {
-      s("https://search.brave.com");
       hasRunS = true;
+      setTimeout(function() {
+        s("https://search.brave.com");
+      }, 5000);
     }
   }
   // Initial check
