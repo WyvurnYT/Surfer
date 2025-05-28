@@ -60,47 +60,30 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   });
 } else if (isJS) {
   const _fileContents = (await fileReq.text());
-
-  // 1. Replace Google search with Brave search
-  let patchedContents = _fileContents.replace(
+  // PATCH: Replace Google search with Brave search
+  const patchedContents = _fileContents.replace(
     "https://www.google.com/search?q=",
     "https://search.brave.com/search?q="
   );
 
-  // 2. Replace the first instance of rh://welcome/ with https://search.brave.com/
-  patchedContents = patchedContents.replace(
-    "rh://welcome/",
-    "https://search.brave.com/"
-  );
-
-  // 3, 4, 5: Inject extra JS for robust UI and navigation patching
-  const extraPatch = `
+  // Inject robust JS to update the message text whenever it appears
+  const injectScript = `
 (function() {
-  // 3. Robustly update the welcome message text
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
-    if (el && el.textContent !== "Surfer Browser. Powered by Rammerhead.") {
-      el.textContent = "Surfer Browser. Powered by Rammerhead.";
-    }
+if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
+  el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
+}
   }
+  // Initial check
   updateMsg();
-  new MutationObserver(updateMsg).observe(document.body, { childList: true, subtree: true });
-
-  // 4. Remove target="_blank" from all links
-  function patchLinks() {
-    document.querySelectorAll('a[target="_blank"]').forEach(function(link) {
-      link.removeAttribute('target');
-    });
-  }
-  patchLinks();
-  new MutationObserver(patchLinks).observe(document.body, {childList: true, subtree: true});
-
-  // 5. Override window.open to do nothing
-  window.open = function() { return null; };
+  // Keep watching for changes in the body
+  var observer = new MutationObserver(updateMsg);
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
 
-  const finalJS = patchedContents + extraPatch;
+  const finalJS = patchedContents + injectScript;
 
   return new Response(finalJS, {
     headers: {
