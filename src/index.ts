@@ -83,10 +83,11 @@ const injectScript = `
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // Run s('https://search.brave.com') every time space is pressed
+  // Run s('https://search.brave.com') and log to console every time space is pressed
   window.addEventListener("keydown", function(e) {
     if (e.code === "Space" && typeof s === "function") {
       s("https://search.brave.com");
+      console.log("Spacebar pressed, ran s('https://search.brave.com')");
     }
   });
 })();
