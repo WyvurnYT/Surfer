@@ -69,19 +69,19 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
   // Inject robust JS to update the message text whenever it appears
-  const injectScript = `
+ const injectScript = `
 (function() {
-  let hasRunS = false;
+  let hasRunI = false;
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
     }
-    // Run s() only once, 5 seconds after the first mutation
-    if (!hasRunS && typeof s === "function") {
-      hasRunS = true;
+    // Run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
+    if (!hasRunI && typeof i === "function" && typeof Ve === "function") {
+      hasRunI = true;
       setTimeout(function() {
-        s("https://search.brave.com");
+        i(Ve("https://search.brave.com"));
       }, 5000);
     }
   }
