@@ -61,19 +61,21 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 } else if (isJS) {
   const _fileContents = (await fileReq.text());
   // PATCH: Replace Google search with Brave search
-  const patchedContents = _fileContents.replace(
+  let patchedContents = _fileContents.replace(
     "https://www.google.com/search?q=",
     "https://search.brave.com/search?q="
   );
+  // PATCH: Replace all rh://welcome/ with https://search.brave.com
+  patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
   // Inject robust JS to update the message text whenever it appears
   const injectScript = `
 (function() {
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
-if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
-  el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
-}
+    if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
+      el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
+    }
   }
   // Initial check
   updateMsg();
