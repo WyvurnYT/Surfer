@@ -60,13 +60,17 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 			});
 		} else if (isJS) {
   const _fileContents = (await fileReq.text());
+  // PATCH: Replace Google search with Brave search
   let patchedContents = _fileContents.replace(
     "https://www.google.com/search?q=",
     "https://search.brave.com/search?q="
   );
+  // PATCH: Replace all rh://welcome/ with https://search.brave.com
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-  const autoOpenLogic = `
+  // Find the end of Ko array for safe global-scope injection
+  const koEnd = "];function Qo(e)";
+  const injectLogic = `
 /* Surfer PATCH: auto-open from ?url= param */
 (function() {
   function getQueryParam(name) {
@@ -86,16 +90,16 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 })();
 `;
 
-  const injectionPoint = '"open-direct"===e';
-  const idx = patchedContents.indexOf(injectionPoint);
-  if (idx !== -1) {
-    const insertAt = idx + injectionPoint.length;
-    patchedContents =
-      patchedContents.slice(0, insertAt) +
-      ";\n" + autoOpenLogic + "\n" + // <-- this ensures you do NOT break JS syntax!
-      patchedContents.slice(insertAt);
+  let injected = false;
+  if (patchedContents.includes(koEnd)) {
+    patchedContents = patchedContents.replace(
+      koEnd,
+      "];\n" + injectLogic + "\nfunction Qo(e)"
+    );
+    injected = true;
   }
 
+  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end
   const injectScript = `
 (function() {
   let hasRun = false;
