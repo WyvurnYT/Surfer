@@ -58,18 +58,18 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 					})
 				}
 			});
-		} else if (isJS) {
-			const _fileContents = (await fileReq.text());
-			// PATCH: Replace Google search with Brave search
-			let patchedContents = _fileContents.replace(
-				"https://www.google.com/search?q=",
-				"https://search.brave.com/search?q="
-			);
-			// PATCH: Replace all rh://welcome/ with https://search.brave.com
-			patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
+		else if (isJS) {
+  const _fileContents = (await fileReq.text());
+  // PATCH: Replace Google search with Brave search
+  let patchedContents = _fileContents.replace(
+    "https://www.google.com/search?q=",
+    "https://search.brave.com/search?q="
+  );
+  // PATCH: Replace all rh://welcome/ with https://search.brave.com
+  patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-			// PATCH: Inject auto-open logic into main app scope, right after 'open-direct"= '
-			const autoOpenLogic = `
+  // PATCH: Inject auto-open logic into main app scope, right after '"open-direct"===e'
+  const autoOpenLogic = `
 /* Surfer PATCH: auto-open from ?url= param */
 (function() {
   function getQueryParam(name) {
@@ -89,19 +89,19 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 })();
 `;
 
-			// Find the unique 'open-direct"= ' marker and inject immediately after
-			const injectionPoint = 'open-direct"= ';
-			const idx = patchedContents.indexOf(injectionPoint);
-			if (idx !== -1) {
-				const insertAt = idx + injectionPoint.length;
-				patchedContents =
-					patchedContents.slice(0, insertAt) +
-					autoOpenLogic +
-					patchedContents.slice(insertAt);
-			}
+  // Find the unique '"open-direct"===e' marker and inject immediately after
+  const injectionPoint = '"open-direct"===e';
+  const idx = patchedContents.indexOf(injectionPoint);
+  if (idx !== -1) {
+    const insertAt = idx + injectionPoint.length;
+    patchedContents =
+      patchedContents.slice(0, insertAt) +
+      autoOpenLogic +
+      patchedContents.slice(insertAt);
+  }
 
-			// The rest of your existing injectScript logic (MutationObserver/message) is kept at the end, but without the i(Ve(...)) part and no console logs
-			const injectScript = `
+  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end, but without the i(Ve(...)) part and no console logs
+  const injectScript = `
 (function() {
   let hasRun = false;
   function updateMsg() {
@@ -132,23 +132,23 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 })();
 `;
 
-			const finalJS = patchedContents + injectScript;
+  const finalJS = patchedContents + injectScript;
 
-			return new Response(finalJS, {
-				headers: {
-					"Access-Control-Allow-Origin": "*",
-					"Content-Type": "application/javascript",
-					"Cache-Control": "no-transform",
-					"ETag": crypto.randomUUID().split("-").join(""),
-					"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-						path: "/",
-						httpOnly: true,
-						secure: true,
-						sameSite: true
-					})
-				},
-			});
-		} else {
+  return new Response(finalJS, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/javascript",
+      "Cache-Control": "no-transform",
+      "ETag": crypto.randomUUID().split("-").join(""),
+      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: true
+      })
+    },
+  });
+} else {
 			return new Response("Malformed", {
 				headers: {
 					"Content-Type": "text/plain",
