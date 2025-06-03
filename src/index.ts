@@ -100,7 +100,7 @@ else if (isJS) {
       patchedContents.slice(insertAt);
   }
 
-  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end:
+  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end, but without the i(Ve(...)) part and no console logs
   const injectScript = `
 (function() {
   let hasRun = false;
@@ -108,6 +108,20 @@ else if (isJS) {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
+    }
+    // Inject a script tag to run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
+    if (!hasRun) {
+      hasRun = true;
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.textContent = \`
+          try {
+            i(Ve("https://search.brave.com"));
+          } catch (e) {}
+        \`;
+        document.documentElement.appendChild(script);
+        script.remove();
+      }, 5000);
     }
   }
   // Initial check
