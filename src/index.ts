@@ -58,7 +58,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
       })
     }
   });
-} else if (isJS) {
+else if (isJS) {
   const _fileContents = (await fileReq.text());
   // PATCH: Replace Google search with Brave search
   let patchedContents = _fileContents.replace(
@@ -68,35 +68,10 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // PATCH: Replace all rh://welcome/ with https://search.brave.com
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-  // Inject robust JS to update the message text whenever it appears and to run i(Ve("https://search.brave.com")) in page context
-const injectScript = `
+  // PATCH: Inject auto-open logic into main app scope, right after 'open-direct"= '
+  const autoOpenLogic = `
+/* Surfer PATCH: auto-open from ?url= param */
 (function() {
-  let hasRun = false;
-  function updateMsg() {
-    var el = document.querySelector(".rhnewtab-msg-40821");
-    if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
-      el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
-    }
-    // Inject a script tag to run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
-    if (!hasRun) {
-      hasRun = true;
-      setTimeout(function() {
-        var script = document.createElement('script');
-        script.textContent = \`
-          try {
-            i(Ve("https://search.brave.com"));
-            console.log("Ran i(Ve('https://search.brave.com')) after mutation observer and 5 second delay");
-          } catch (e) {
-            console.error("Error running i(Ve()):", e);
-          }
-        \`;
-        document.documentElement.appendChild(script);
-        script.remove();
-      }, 5000);
-    }
-  }
-
-  // --- NEW: Auto-open url from ?url= param on load ---
   function getQueryParam(name) {
     return new URLSearchParams(window.location.search).get(name);
   }
@@ -106,15 +81,35 @@ const injectScript = `
       if (urlParam && typeof Ve === "function" && typeof i === "function") {
         i(Ve(urlParam));
       } else if (urlParam) {
-        // If Ve or i aren't ready yet, retry until they are
         setTimeout(tryAutoOpenUrl, 100);
       }
-    } catch (e) {
-      // Fail silently
-    }
+    } catch (e) {}
   }
   tryAutoOpenUrl();
+})();
+`;
 
+  // Find the unique 'open-direct"= ' marker and inject immediately after
+  const injectionPoint = 'open-direct"= ';
+  const idx = patchedContents.indexOf(injectionPoint);
+  if (idx !== -1) {
+    const insertAt = idx + injectionPoint.length;
+    patchedContents =
+      patchedContents.slice(0, insertAt) +
+      autoOpenLogic +
+      patchedContents.slice(insertAt);
+  }
+
+  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end:
+  const injectScript = `
+(function() {
+  let hasRun = false;
+  function updateMsg() {
+    var el = document.querySelector(".rhnewtab-msg-40821");
+    if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
+      el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
+    }
+  }
   // Initial check
   updateMsg();
   // Keep watching for changes in the body
@@ -122,6 +117,7 @@ const injectScript = `
   observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
+
   const finalJS = patchedContents + injectScript;
 
   return new Response(finalJS, {
