@@ -68,38 +68,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // PATCH: Replace all rh://welcome/ with https://search.brave.com
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-  // Find the end of Ko array for safe global-scope injection
-  const koEnd = "];function Qo(e)";
-  const injectLogic = `
-/* Surfer PATCH: auto-open from ?url= param */
-(function() {
-  function getQueryParam(name) {
-    return new URLSearchParams(window.location.search).get(name);
-  }
-  function tryAutoOpenUrl() {
-    try {
-      const urlParam = getQueryParam("url");
-      if (urlParam && typeof Ve === "function" && typeof i === "function") {
-        i(Ve(urlParam));
-      } else if (urlParam) {
-        setTimeout(tryAutoOpenUrl, 100);
-      }
-    } catch (e) {}
-  }
-  tryAutoOpenUrl();
-})();
-`;
-
-  let injected = false;
-  if (patchedContents.includes(koEnd)) {
-    patchedContents = patchedContents.replace(
-      koEnd,
-      "];\n" + injectLogic + "\nfunction Qo(e)"
-    );
-    injected = true;
-  }
-
-  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end
+  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end, but without the i(Ve(...)) part and no console logs
   const injectScript = `
 (function() {
   let hasRun = false;
@@ -108,6 +77,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
     }
+    // Inject a script tag to run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
     if (!hasRun) {
       hasRun = true;
       setTimeout(function() {
@@ -122,7 +92,9 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
       }, 5000);
     }
   }
+  // Initial check
   updateMsg();
+  // Keep watching for changes in the body
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
 })();
