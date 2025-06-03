@@ -69,7 +69,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
   // Inject robust JS to update the message text whenever it appears and to run i(Ve("https://search.brave.com")) in page context
- const injectScript = `
+const injectScript = `
 (function() {
   let hasRun = false;
   function updateMsg() {
@@ -105,16 +105,14 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   function getQueryParam(name) {
     return new URLSearchParams(window.location.search).get(name);
   }
-  function openProxiedUrl(url) {
-    if (typeof i === "function" && typeof Ve === "function") {
-      i(Ve(url));
-    } else {
-      window.location.href = url;
+  try {
+    const urlParam = getQueryParam("url");
+    if (urlParam && typeof Ve === "function" && typeof i === "function") {
+      // Use the exact same logic as the "Open in-browser" button
+      i(Ve(urlParam));
     }
-  }
-  const urlParam = getQueryParam("url");
-  if (urlParam) {
-    openProxiedUrl(urlParam);
+  } catch (e) {
+    // Fail silently
   }
 })();
 `;
