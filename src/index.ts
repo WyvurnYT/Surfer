@@ -95,25 +95,31 @@ const injectScript = `
       }, 5000);
     }
   }
-  // Initial check
-  updateMsg();
-  // Keep watching for changes in the body
-  var observer = new MutationObserver(updateMsg);
-  observer.observe(document.body, { childList: true, subtree: true });
 
   // --- NEW: Auto-open url from ?url= param on load ---
   function getQueryParam(name) {
     return new URLSearchParams(window.location.search).get(name);
   }
-  try {
-    const urlParam = getQueryParam("url");
-    if (urlParam && typeof Ve === "function" && typeof i === "function") {
-      // Use the exact same logic as the "Open in-browser" button
-      i(Ve(urlParam));
+  function tryAutoOpenUrl() {
+    try {
+      const urlParam = getQueryParam("url");
+      if (urlParam && typeof Ve === "function" && typeof i === "function") {
+        i(Ve(urlParam));
+      } else if (urlParam) {
+        // If Ve or i aren't ready yet, retry until they are
+        setTimeout(tryAutoOpenUrl, 100);
+      }
+    } catch (e) {
+      // Fail silently
     }
-  } catch (e) {
-    // Fail silently
   }
+  tryAutoOpenUrl();
+
+  // Initial check
+  updateMsg();
+  // Keep watching for changes in the body
+  var observer = new MutationObserver(updateMsg);
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
   const finalJS = patchedContents + injectScript;
