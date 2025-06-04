@@ -32,9 +32,9 @@ export default {
 			}
 		});
 		if (isCSS) {
-			const _fileContents = (await fileReq.text());
-			// Inject CSS to hide the specified elements
-			const patchedCSS = `
+  const _fileContents = (await fileReq.text());
+  // Inject CSS to hide the specified elements
+  const patchedCSS = `
 .rhnewtab-oldui-container-357674,
 .rhnewtab-discord-532247,
 .rhnewtab-header-ad-793410,
@@ -44,21 +44,21 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 }
 ` + _fileContents;
 
-			return new Response(patchedCSS, {
-				headers: {
-					"Access-Control-Allow-Origin": "*",
-					"Content-Type": "text/css",
-					"Cache-Control": "no-transform",
-					"ETag": crypto.randomUUID().split("-").join(""),
-					"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-						path: "/",
-						httpOnly: true,
-						secure: true,
-						sameSite: true
-					})
-				}
-			});
-		} else if (isJS) {
+  return new Response(patchedCSS, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "text/css",
+      "Cache-Control": "no-transform",
+      "ETag": crypto.randomUUID().split("-").join(""),
+      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: true
+      })
+    }
+  });
+} else if (isJS) {
   const _fileContents = (await fileReq.text());
   // PATCH: Replace Google search with Brave search
   let patchedContents = _fileContents.replace(
@@ -68,7 +68,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // PATCH: Replace all rh://welcome/ with https://search.brave.com
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-  // The rest of your existing injectScript logic (MutationObserver/message) is kept at the end, but without the i(Ve(...)) part and no console logs
+  // Inject robust JS to update the message text whenever it appears and to run i(Ve("https://search.brave.com")) in page context
   const injectScript = `
 (function() {
   let hasRun = false;
@@ -85,7 +85,10 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
         script.textContent = \`
           try {
             i(Ve("https://search.brave.com"));
-          } catch (e) {}
+            console.log("Ran i(Ve('https://search.brave.com')) after mutation observer and 5 second delay");
+          } catch (e) {
+            console.error("Error running i(Ve()):", e);
+          }
         \`;
         document.documentElement.appendChild(script);
         script.remove();
@@ -99,7 +102,6 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
-
   const finalJS = patchedContents + injectScript;
 
   return new Response(finalJS, {
@@ -115,7 +117,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
         sameSite: true
       })
     },
-  });
+  }); 
 } else {
 			return new Response("Malformed", {
 				headers: {
