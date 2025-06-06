@@ -68,30 +68,21 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // PATCH: Replace all rh://welcome/ with https://search.brave.com
   patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
 
-  // Inject robust JS to update the message text whenever it appears and to run i(Ve("https://search.brave.com")) in page context
-  const injectScript = `
+  // Inject robust JS to update the message text whenever it appears
+const injectScript = `
 (function() {
-  let hasRun = false;
+  let hasRunS = false;
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
     }
-    // Inject a script tag to run i(Ve("https://search.brave.com")) only once, 5 seconds after the first mutation
-    if (!hasRun) {
-      hasRun = true;
+    // Run s() unconditionally, only once, 5 seconds after the first mutation
+    if (!hasRunS) {
+      hasRunS = true;
       setTimeout(function() {
-        var script = document.createElement('script');
-        script.textContent = \`
-          try {
-            i(Ve("https://search.brave.com"));
-            console.log("Ran i(Ve('https://search.brave.com')) after mutation observer and 5 second delay");
-          } catch (e) {
-            console.error("Error running i(Ve()):", e);
-          }
-        \`;
-        document.documentElement.appendChild(script);
-        script.remove();
+        s("https://search.brave.com");
+        console.log("Ran s('https://search.brave.com') after mutation observer and 5 second delay");
       }, 5000);
     }
   }
