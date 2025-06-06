@@ -58,14 +58,43 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 					})
 				}
 			});
-		} else if (isJS) {
+		// ... (rest of your worker code remains unchanged)
+
+} else if (isJS) {
   const _fileContents = await fileReq.text();
-  // Inject JavaScript to remove all elements with the "rhpages-260926 rhnewtab-569188" class, only once
+  // Inject JavaScript to remove specific elements once when they first appear
   const injectScript = `
 (function() {
-  document.querySelectorAll('.rhpages-260926.rhnewtab-569188').forEach(function(el) {
-    el.remove();
+  // List of target selectors to remove
+  const selectors = [
+    '.rhnewtab-header-480641',
+    '.rhnewtab-discord-435940',
+    '.rhnewtab-oldui-container-947649'
+  ];
+
+  // Function to remove all elements matching selectors, returns true if any were removed
+  function removeTargets() {
+    let removedAny = false;
+    selectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.remove();
+        removedAny = true;
+      });
+    });
+    return removedAny;
+  }
+
+  // First attempt in case elements are already present
+  if (removeTargets()) return;
+
+  // Otherwise, observe DOM until all the elements are removed, then disconnect observer
+  const observer = new MutationObserver(() => {
+    if (removeTargets()) {
+      observer.disconnect();
+    }
   });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
   const finalJS = _fileContents + injectScript;
