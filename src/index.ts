@@ -71,24 +71,14 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // Inject robust JS to update the message text whenever it appears
 const injectScript = `
 (function() {
-  let hasRunS = false;
   function updateMsg() {
     var el = document.querySelector(".rhnewtab-msg-40821");
     if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
       el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
     }
-    // Run s() unconditionally, only once, 5 seconds after the first mutation
-    if (!hasRunS) {
-      hasRunS = true;
-      setTimeout(function() {
-        s("https://search.brave.com");
-        console.log("Ran s('https://search.brave.com') after mutation observer and 5 second delay");
-      }, 5000);
-    }
   }
   // Initial check
   updateMsg();
-  // Keep watching for changes in the body
   var observer = new MutationObserver(updateMsg);
   observer.observe(document.body, { childList: true, subtree: true });
 })();
