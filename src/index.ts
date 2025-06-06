@@ -32,9 +32,9 @@ export default {
 			}
 		});
 		if (isCSS) {
-  const _fileContents = (await fileReq.text());
-  // Inject CSS to hide the specified elements
-  const patchedCSS = `
+			const _fileContents = (await fileReq.text());
+			// Inject CSS to hide the specified elements
+			const patchedCSS = `
 .rhnewtab-oldui-container-357674,
 .rhnewtab-discord-532247,
 .rhnewtab-header-ad-793410,
@@ -44,62 +44,53 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 }
 ` + _fileContents;
 
-  return new Response(patchedCSS, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "text/css",
-      "Cache-Control": "no-transform",
-      "ETag": crypto.randomUUID().split("-").join(""),
-      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: true
-      })
-    }
-  });
-} else if (isJS) {
-  const _fileContents = (await fileReq.text());
-  // PATCH: Replace Google search with Brave search
-  let patchedContents = _fileContents.replace(
-    "https://www.google.com/search?q=",
-    "https://search.brave.com/search?q="
-  );
-  // PATCH: Replace all rh://welcome/ with https://search.brave.com
-  patchedContents = patchedContents.replace(/rh:\/\/welcome\//g, "https://search.brave.com");
-
-  // Inject robust JS to update the message text whenever it appears
-const injectScript = `
+			return new Response(patchedCSS, {
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "text/css",
+					"Cache-Control": "no-transform",
+					"ETag": crypto.randomUUID().split("-").join(""),
+					"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+						path: "/",
+						httpOnly: true,
+						secure: true,
+						sameSite: true
+					})
+				}
+			});
+		} else if (isJS) {
+			const _fileContents = await fileReq.text();
+			// Inject JavaScript to remove all elements with the "rhpages-260926 rhnewtab-569188" class
+			const injectScript = `
 (function() {
-  function updateMsg() {
-    var el = document.querySelector(".rhnewtab-msg-40821");
-    if (el && el.innerText !== "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.") {
-      el.innerText = "🏄 Welcome to Surfer Browser! 🏄\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nDue to limitations of the browser, some links may not work.";
-    }
+  function removeTargetElements() {
+    document.querySelectorAll('.rhpages-260926.rhnewtab-569188').forEach(function(el) {
+      el.remove();
+    });
   }
-  // Initial check
-  updateMsg();
-  var observer = new MutationObserver(updateMsg);
+  // Remove on script load
+  removeTargetElements();
+  // Observe DOM changes to remove future elements
+  var observer = new MutationObserver(removeTargetElements);
   observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
-  const finalJS = patchedContents + injectScript;
-
-  return new Response(finalJS, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "application/javascript",
-      "Cache-Control": "no-transform",
-      "ETag": crypto.randomUUID().split("-").join(""),
-      "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: true
-      })
-    },
-  }); 
-} else {
+			const finalJS = _fileContents + injectScript;
+			return new Response(finalJS, {
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "application/javascript",
+					"Cache-Control": "no-transform",
+					"ETag": crypto.randomUUID().split("-").join(""),
+					"Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
+						path: "/",
+						httpOnly: true,
+						secure: true,
+						sameSite: true
+					})
+				},
+			}); 
+		} else {
 			return new Response("Malformed", {
 				headers: {
 					"Content-Type": "text/plain",
