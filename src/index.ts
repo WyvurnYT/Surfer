@@ -60,19 +60,19 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 			});
 		} else if (isJS) {
 			const _fileContents = await fileReq.text();
-			// Inject JavaScript to remove all elements with the "rhpages-260926 rhnewtab-569188" class
+			// Inject JavaScript to remove all elements with the "rhpages-260926 rhnewtab-569188" class ONCE
 			const injectScript = `
 (function() {
-  function removeTargetElements() {
+  var removed = false;
+  function removeTargetElementsOnce() {
+    if (removed) return;
     document.querySelectorAll('.rhpages-260926.rhnewtab-569188').forEach(function(el) {
       el.remove();
     });
+    removed = true;
   }
-  // Remove on script load
-  removeTargetElements();
-  // Observe DOM changes to remove future elements
-  var observer = new MutationObserver(removeTargetElements);
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Remove once on script load
+  removeTargetElementsOnce();
 })();
 `;
 			const finalJS = _fileContents + injectScript;
