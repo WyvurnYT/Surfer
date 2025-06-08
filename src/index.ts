@@ -17,7 +17,7 @@ import {
 } from "cookie";
 
 export default {
-  async fetch(request, env, ctx): Promise < Response > {
+  async fetch(request, env, ctx): Promise<Response> {
     ctx.passThroughOnException();
     const req = new Request(request);
     const url = new URL(req.url);
@@ -36,12 +36,12 @@ export default {
     });
     if (isCSS) {
       const _fileContents = (await fileReq.text());
-      // Inject CSS to hide the specified elements
+      // Inject CSS to hide elements with dynamic classnames (prefix-based)
       const patchedCSS = `
-.rhnewtab-oldui-container-357674,
-.rhnewtab-discord-532247,
-.rhnewtab-header-ad-793410,
-.rhnewtab-header-268997,
+[class^="rhnewtab-oldui-container-"],
+[class^="rhnewtab-discord-"],
+[class^="rhnewtab-header-ad-"],
+[class^="rhnewtab-header-"],
 div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   display: none !important;
 }
@@ -61,28 +61,35 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
           })
         }
       });
-      // ... (rest of your worker code remains unchanged)
-
     } else if (isJS) {
       const _fileContents = await fileReq.text();
-      // Inject JavaScript to remove specific elements once when they first appear
+      // Inject JS to remove elements with classnames starting with given prefixes
       const injectScript = `
 (function() {
-  // List of target selectors to remove
-  const selectors = [
-    '.rhnewtab-header-480641',
-    '.rhnewtab-discord-435940',
-    '.rhnewtab-oldui-container-947649'
+  // Prefixes of classes to remove
+  const prefixes = [
+    "rhnewtab-oldui-container-",
+    "rhnewtab-discord-",
+    "rhnewtab-header-ad-",
+    "rhnewtab-header-"
   ];
-
-  // Function to remove all elements matching selectors, returns true if any were removed
   function removeTargets() {
     let removedAny = false;
-    selectors.forEach(selector => {
-      document.querySelectorAll(selector).forEach(el => {
-        el.remove();
-        removedAny = true;
-      });
+    document.querySelectorAll('[class]').forEach(el => {
+      for (const prefix of prefixes) {
+        for (const cls of el.classList) {
+          if (cls.startsWith(prefix)) {
+            el.remove();
+            removedAny = true;
+            break;
+          }
+        }
+      }
+    });
+    // Remove the specific div by title as well
+    document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]').forEach(el => {
+      el.remove();
+      removedAny = true;
     });
     return removedAny;
   }
@@ -90,7 +97,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   // First attempt in case elements are already present
   if (removeTargets()) return;
 
-  // Otherwise, observe DOM until all the elements are removed, then disconnect observer
+  // Otherwise, observe DOM until all elements are removed, then disconnect
   const observer = new MutationObserver(() => {
     if (removeTargets()) {
       observer.disconnect();
@@ -126,4 +133,4 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     }
   },
 }
-satisfies ExportedHandler < Env > ;
+satisfies ExportedHandler<Env>;
