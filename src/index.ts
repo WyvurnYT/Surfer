@@ -62,11 +62,29 @@ const jsInjection = `
     });
   }
 
+  // Replace all instances of Google search URLs with Brave search URLs
+  function replaceGoogleSearchUrls() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    const googleRegex = /https:\/\/www\\.google\\.com\/search\\?q=/g;
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue && googleRegex.test(node.nodeValue)) {
+        node.nodeValue = node.nodeValue.replace(googleRegex, "https://search.brave.com/search?q=");
+      }
+    }
+    // Also patch all links in href attributes
+    document.querySelectorAll('a[href*="https://www.google.com/search?q="]').forEach(a => {
+      a.href = a.href.replace(googleRegex, "https://search.brave.com/search?q=");
+    });
+  }
+
   removeTargets();
+  replaceGoogleSearchUrls();
 
   const observer = new MutationObserver(() => {
     observer.disconnect();
     removeTargets();
+    replaceGoogleSearchUrls();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 
