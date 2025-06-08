@@ -73,35 +73,45 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
     "rhnewtab-header-ad-",
     "rhnewtab-header-"
   ];
-  function removeTargets() {
-    let removedAny = false;
+
+  // Prefix to set text
+  const msgPrefix = "rhnewtab-msg-";
+
+  function patchTargets() {
+    let changedAny = false;
+    // Remove elements with unwanted prefixes
     document.querySelectorAll('[class]').forEach(el => {
       for (const prefix of prefixes) {
         for (const cls of el.classList) {
           if (cls.startsWith(prefix)) {
             el.remove();
-            removedAny = true;
-            break;
+            changedAny = true;
+            return;
           }
+        }
+      }
+      // Set .textContent to "Aloha" for classes starting with rhnewtab-msg-
+      for (const cls of el.classList) {
+        if (cls.startsWith(msgPrefix)) {
+          el.textContent = "Aloha";
+          changedAny = true;
         }
       }
     });
     // Remove the specific div by title as well
     document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]').forEach(el => {
       el.remove();
-      removedAny = true;
+      changedAny = true;
     });
-    return removedAny;
+    return changedAny;
   }
 
   // First attempt in case elements are already present
-  if (removeTargets()) return;
+  patchTargets();
 
-  // Otherwise, observe DOM until all elements are removed, then disconnect
+  // Observe DOM for dynamically added elements and patch them
   const observer = new MutationObserver(() => {
-    if (removeTargets()) {
-      observer.disconnect();
-    }
+    patchTargets();
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
