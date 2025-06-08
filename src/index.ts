@@ -62,32 +62,11 @@ const jsInjection = `
     });
   }
 
-  // Replace all instances of Google search URLs with Brave search URLs
-  function replaceGoogleSearchUrls() {
-    const googleUrl = "https://www.google.com/search?q=";
-    const braveUrl = "https://search.brave.com/search?q=";
-
-    // Replace in text nodes
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node.nodeValue && node.nodeValue.includes(googleUrl)) {
-        node.nodeValue = node.nodeValue.split(googleUrl).join(braveUrl);
-      }
-    }
-    // Replace in href attributes
-    document.querySelectorAll('a[href*="https://www.google.com/search?q="]').forEach(a => {
-      a.href = a.href.split(googleUrl).join(braveUrl);
-    });
-  }
-
   removeTargets();
-  replaceGoogleSearchUrls();
 
   const observer = new MutationObserver(() => {
     observer.disconnect();
     removeTargets();
-    replaceGoogleSearchUrls();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 
@@ -95,7 +74,6 @@ const jsInjection = `
 })();
 `;
 
-// ...all code below remains unchanged...
 export default {
   async fetch(request, env, ctx): Promise<Response> {
     ctx.passThroughOnException();
@@ -128,7 +106,9 @@ export default {
     }
 
     if (isJS) {
-      const originalJS = await fileResponse.text();
+      let originalJS = await fileResponse.text();
+      // Replace all instances of the Google search URL with Brave search URL
+      originalJS = originalJS.split("https://www.google.com/search?q=").join("https://search.brave.com/search?q=");
       const finalJS = originalJS + jsInjection;
 
       return new Response(finalJS, {
