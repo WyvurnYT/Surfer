@@ -132,5 +132,4 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
       })
     }
   },
-}
-satisfies ExportedHandler<Env>;
+}	satisfies ExportedHandler<Env>;
