@@ -87,11 +87,10 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
         }
       }
     });
-    // Set textContent to "Aloha" for classes starting with rhnewtab-msg-
     Array.from(document.querySelectorAll('[class]')).forEach(el => {
       for (const cls of el.classList) {
         if (cls.startsWith(msgPrefix)) {
-          el.textContent = "Aloha";
+          el.textContent = "Note: Due to platform limitations, some links may not function properly.";
           break;
         }
       }
