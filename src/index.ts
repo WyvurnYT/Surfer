@@ -63,60 +63,59 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
       });
     } else if (isJS) {
       const _fileContents = await fileReq.text();
-      // Inject JS to remove elements with classnames starting with given prefixes
+
+      // Safe inject: disconnect observer during patch, and use static lists
       const injectScript = `
 (function() {
-  // Prefixes of classes to remove
   const prefixes = [
     "rhnewtab-oldui-container-",
     "rhnewtab-discord-",
     "rhnewtab-header-ad-",
     "rhnewtab-header-"
   ];
-
-  // Prefix to set text
   const msgPrefix = "rhnewtab-msg-";
 
-  function patchTargets() {
-    let changedAny = false;
+  function removeAndPatchTargets() {
     // Remove elements with unwanted prefixes
-    document.querySelectorAll('[class]').forEach(el => {
+    Array.from(document.querySelectorAll('[class]')).forEach(el => {
       for (const prefix of prefixes) {
         for (const cls of el.classList) {
           if (cls.startsWith(prefix)) {
             el.remove();
-            changedAny = true;
-            return;
+            return; // Element removed, don't process further
           }
         }
       }
-      // Set .textContent to "Aloha" for classes starting with rhnewtab-msg-
+    });
+    // Set textContent to "Aloha" for classes starting with rhnewtab-msg-
+    Array.from(document.querySelectorAll('[class]')).forEach(el => {
       for (const cls of el.classList) {
         if (cls.startsWith(msgPrefix)) {
           el.textContent = "Aloha";
-          changedAny = true;
+          break;
         }
       }
     });
     // Remove the specific div by title as well
-    document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]').forEach(el => {
+    Array.from(document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]')).forEach(el => {
       el.remove();
-      changedAny = true;
     });
-    return changedAny;
   }
 
-  // First attempt in case elements are already present
-  patchTargets();
+  // Initial patch
+  removeAndPatchTargets();
 
-  // Observe DOM for dynamically added elements and patch them
+  // Set up observer safely
   const observer = new MutationObserver(() => {
-    patchTargets();
+    observer.disconnect(); // Prevent recursive triggers
+    removeAndPatchTargets();
+    observer.observe(document.body, { childList: true, subtree: true });
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
 })();
 `;
+
       const finalJS = _fileContents + injectScript;
       return new Response(finalJS, {
         headers: {
