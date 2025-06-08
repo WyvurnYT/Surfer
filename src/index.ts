@@ -64,17 +64,19 @@ const jsInjection = `
 
   // Replace all instances of Google search URLs with Brave search URLs
   function replaceGoogleSearchUrls() {
+    const pattern = /https:\/\/www\.google\.com\/search\?q=/g;
+
+    // Replace in text nodes
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
     let node;
-    const googleRegex = /https:\/\/www\\.google\\.com\/search\\?q=/g;
     while ((node = walker.nextNode())) {
-      if (node.nodeValue && googleRegex.test(node.nodeValue)) {
-        node.nodeValue = node.nodeValue.replace(googleRegex, "https://search.brave.com/search?q=");
+      if (node.nodeValue && pattern.test(node.nodeValue)) {
+        node.nodeValue = node.nodeValue.replace(pattern, "https://search.brave.com/search?q=");
       }
     }
-    // Also patch all links in href attributes
+    // Replace in href attributes
     document.querySelectorAll('a[href*="https://www.google.com/search?q="]').forEach(a => {
-      a.href = a.href.replace(googleRegex, "https://search.brave.com/search?q=");
+      a.href = a.href.replace(pattern, "https://search.brave.com/search?q=");
     });
   }
 
