@@ -1,43 +1,31 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.toml`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { parse, serialize } from "cookie";
 
-import {
-  parse,
-  serialize
-} from "cookie";
+const USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
 
-export default {
-  async fetch(request, env, ctx): Promise<Response> {
-    ctx.passThroughOnException();
-    const req = new Request(request);
-    const url = new URL(req.url);
-    const cookies = parse(req.headers.get("Cookie") || "");
-    const isCSS = url.href.includes(".css");
-    const isJS = url.href.includes(".js");
-    const fileReq = await fetch(url.href.replace(url.hostname, "direct.rammerhead.org"), {
-      method: req.method,
-      headers: {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Cache-Control": "no-cache",
-        "Dnt": "1",
-        "Pragma": "no-cache",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
-      }
-    });
-    if (isCSS) {
-      const _fileContents = (await fileReq.text());
-      // Inject CSS to hide elements with dynamic classnames (prefix-based)
-      const patchedCSS = `
+const COMMON_HEADERS = {
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+  "Cache-Control": "no-cache",
+  Dnt: "1",
+  Pragma: "no-cache",
+  "User-Agent": USER_AGENT,
+};
+
+const COOKIE_NAME = "__BRH_ACCESS";
+const COOKIE_VALUE = "i_am_using_better_rh";
+
+const createCookieHeader = () =>
+  serialize(COOKIE_NAME, COOKIE_VALUE, {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+    sameSite: true,
+  });
+
+const generateETag = () => crypto.randomUUID().replace(/-/g, "");
+
+const cssInjection = `
 [class^="rhnewtab-oldui-container-"],
 [class^="rhnewtab-discord-"],
 [class^="rhnewtab-header-ad-"],
@@ -45,28 +33,10 @@ export default {
 div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   display: none !important;
 }
-` + _fileContents;
+`;
 
-      return new Response(patchedCSS, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "text/css",
-          "Cache-Control": "no-transform",
-          "ETag": crypto.randomUUID().split("-").join(""),
-          "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-            path: "/",
-            httpOnly: true,
-            secure: true,
-            sameSite: true
-          })
-        }
-      });
-    } else if (isJS) {
-      const _fileContents = await fileReq.text();
-
-      // Safe inject: disconnect observer during patch, and use static lists
-      const injectScript = `
-(function() {
+const jsInjection = `
+(function () {
   const prefixes = [
     "rhnewtab-oldui-container-",
     "rhnewtab-discord-",
@@ -75,39 +45,28 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   ];
   const msgPrefix = "rhnewtab-msg-";
 
-  function removeAndPatchTargets() {
-    // Remove elements with unwanted prefixes
-    Array.from(document.querySelectorAll('[class]')).forEach(el => {
-      for (const prefix of prefixes) {
-        for (const cls of el.classList) {
-          if (cls.startsWith(prefix)) {
-            el.remove();
-            return; // Element removed, don't process further
-          }
-        }
-      }
-    });
-    Array.from(document.querySelectorAll('[class]')).forEach(el => {
-      for (const cls of el.classList) {
-        if (cls.startsWith(msgPrefix)) {
+  function removeTargets() {
+    const elements = document.querySelectorAll('[class]');
+    elements.forEach(el => {
+      el.classList.forEach(cls => {
+        if (prefixes.some(prefix => cls.startsWith(prefix))) {
+          el.remove();
+        } else if (cls.startsWith(msgPrefix)) {
           el.textContent = "Note: Due to platform limitations, some links may not function properly.";
-          break;
         }
-      }
+      });
     });
-    // Remove the specific div by title as well
-    Array.from(document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]')).forEach(el => {
+
+    document.querySelectorAll('div[title="Click to open AB cloaked. Ctrl+click to open full url."]').forEach(el => {
       el.remove();
     });
   }
 
-  // Initial patch
-  removeAndPatchTargets();
+  removeTargets();
 
-  // Set up observer safely
   const observer = new MutationObserver(() => {
-    observer.disconnect(); // Prevent recursive triggers
-    removeAndPatchTargets();
+    observer.disconnect();
+    removeTargets();
     observer.observe(document.body, { childList: true, subtree: true });
   });
 
@@ -115,29 +74,58 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 })();
 `;
 
-      const finalJS = _fileContents + injectScript;
+export default {
+  async fetch(request, env, ctx): Promise<Response> {
+    ctx.passThroughOnException();
+
+    const req = new Request(request);
+    const url = new URL(req.url);
+    const pathname = url.href;
+    const isCSS = pathname.endsWith(".css");
+    const isJS = pathname.endsWith(".js");
+
+    const proxiedUrl = pathname.replace(url.hostname, "direct.rammerhead.org");
+    const fileResponse = await fetch(proxiedUrl, {
+      method: req.method,
+      headers: COMMON_HEADERS,
+    });
+
+    if (isCSS) {
+      const originalCSS = await fileResponse.text();
+      const patchedCSS = cssInjection + originalCSS;
+
+      return new Response(patchedCSS, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "text/css",
+          "Cache-Control": "no-transform",
+          ETag: generateETag(),
+          "Set-Cookie": createCookieHeader(),
+        },
+      });
+    }
+
+    if (isJS) {
+      const originalJS = await fileResponse.text();
+      const finalJS = originalJS + jsInjection;
+
       return new Response(finalJS, {
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/javascript",
           "Cache-Control": "no-transform",
-          "ETag": crypto.randomUUID().split("-").join(""),
-          "Set-Cookie": serialize("__BRH_ACCESS", "i_am_using_better_rh", {
-            path: "/",
-            httpOnly: true,
-            secure: true,
-            sameSite: true
-          })
+          ETag: generateETag(),
+          "Set-Cookie": createCookieHeader(),
         },
       });
-    } else {
-      return new Response("Malformed", {
-        headers: {
-          "Content-Type": "text/plain",
-          "Cache-Control": "no-transform",
-          "ETag": crypto.randomUUID().replace(/\-/gm, "")
-        }
-      })
     }
+
+    return new Response("Malformed", {
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-transform",
+        ETag: generateETag(),
+      },
+    });
   },
-}	satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<Env>;
