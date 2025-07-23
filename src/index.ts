@@ -107,8 +107,7 @@ export default {
 
     if (isJS) {
       let originalJS = await fileResponse.text();
-      // Replace all instances of the Google search URL with DDG search URL
-      originalJS = originalJS.split("https://www.google.com/search?q=").join("https://duckduckgo.com/?q=");
+      originalJS = originalJS.split("https://www.google.com/search?q=").join("https://search.brave.com/search?q=");
       const finalJS = originalJS + jsInjection;
 
       return new Response(finalJS, {
