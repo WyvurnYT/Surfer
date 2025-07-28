@@ -26,6 +26,7 @@ const createCookieHeader = () =>
 const generateETag = () => crypto.randomUUID().replace(/-/g, "");
 
 const cssInjection = `
+[class^="rhnewtab-oldui-container-"],
 [class^="rhnewtab-discord-"],
 [class^="rhnewtab-header-ad-"],
 div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
@@ -36,6 +37,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 const jsInjection = `
 (function () {
   const prefixes = [
+		"rhnewtab-oldui-container-"
     "rhnewtab-discord-",
     "rhnewtab-header-ad-"
   ];
