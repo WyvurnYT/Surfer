@@ -37,7 +37,7 @@ div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
 const jsInjection = `
 (function () {
   const prefixes = [
-		"rhnewtab-oldui-container-"
+    "rhnewtab-oldui-container-",
     "rhnewtab-discord-",
     "rhnewtab-header-ad-"
   ];
