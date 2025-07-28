@@ -26,10 +26,8 @@ const createCookieHeader = () =>
 const generateETag = () => crypto.randomUUID().replace(/-/g, "");
 
 const cssInjection = `
-[class^="rhnewtab-oldui-container-"],
 [class^="rhnewtab-discord-"],
 [class^="rhnewtab-header-ad-"],
-[class^="rhnewtab-header-"],
 div[title="Click to open AB cloaked. Ctrl+click to open full url."] {
   display: none !important;
 }
