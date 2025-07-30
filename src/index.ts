@@ -105,7 +105,7 @@ export default {
 
     if (isJS) {
       let originalJS = await fileResponse.text();
-      originalJS = originalJS.split(`https://www.google.com/search?q=`).join(`https://duckduckgo.com/?q=`);
+      originalJS = originalJS.split(`https://www.google.com/search?q=`).join(`https://search.brave.com/search?q=`);
       const finalJS = originalJS + jsInjection;
 
       return new Response(finalJS, {
